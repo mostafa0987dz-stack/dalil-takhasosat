@@ -1,17 +1,13 @@
 
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import data from "@/data/specialties.json";
 import type { Specialty } from "@/types";
 
 const items = data as Specialty[];
 
-// مكون الحاسبة الداخلي
-function CalculatorContent() {
-  const params = useSearchParams();
-
+export default function Calculator() {
   const [serie, setSerie] = useState("علوم تجريبية");
 
   const [marks, setMarks] = useState({
@@ -21,9 +17,13 @@ function CalculatorContent() {
     physics: "",
   });
 
-  const [chosen, setChosen] = useState(
-    params.get("specialty") || ""
-  );
+  const [chosen, setChosen] = useState("");
+
+  // قراءة التخصص من رابط الصفحة بعد تحميل المتصفح
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setChosen(params.get("specialty") || "");
+  }, []);
 
   // حساب المتوسط الحسابي للعلامات المدخلة
   const average = useMemo(() => {
@@ -36,12 +36,13 @@ function CalculatorContent() {
       : null;
   }, [marks]);
 
-  // اقتراح التخصصات المناسبة للشعبة
+  // التخصصات المناسبة للشعبة المختارة
   const recommendations = items
     .filter((s) => s.filiere.includes(serie))
     .sort((a, b) => {
       const aa =
         a.seuil_2025.find((x) => x.serie === serie)?.moyenne ?? 0;
+
       const bb =
         b.seuil_2025.find((x) => x.serie === serie)?.moyenne ?? 0;
 
@@ -76,7 +77,9 @@ function CalculatorContent() {
               "لغات أجنبية",
               "تسيير واقتصاد",
             ].map((x) => (
-              <option key={x}>{x}</option>
+              <option key={x} value={x}>
+                {x}
+              </option>
             ))}
           </select>
         </label>
@@ -100,7 +103,10 @@ function CalculatorContent() {
                 placeholder="0 - 20"
                 value={marks[key as keyof typeof marks]}
                 onChange={(e) =>
-                  setMarks({ ...marks, [key]: e.target.value })
+                  setMarks({
+                    ...marks,
+                    [key]: e.target.value,
+                  })
                 }
               />
             </label>
@@ -115,7 +121,9 @@ function CalculatorContent() {
             value={chosen}
             onChange={(e) => setChosen(e.target.value)}
           >
-            <option value="">كل التخصصات المناسبة</option>
+            <option value="">
+              كل التخصصات المناسبة
+            </option>
 
             {items.map((x) => (
               <option value={x.slug} key={x.slug}>
@@ -152,6 +160,7 @@ function CalculatorContent() {
             >
               <div>
                 <b>{x.nom_ar}</b>
+
                 <p className="mt-1 text-xs text-slate-500">
                   {x.domaine}
                 </p>
@@ -167,20 +176,5 @@ function CalculatorContent() {
           ))}
       </div>
     </section>
-  );
-}
-
-// معالجة useSearchParams باستعمال Suspense
-export default function Calculator() {
-  return (
-    <Suspense
-      fallback={
-        <section className="container-page py-12">
-          جارٍ تحميل الحاسبة...
-        </section>
-      }
-    >
-      <CalculatorContent />
-    </Suspense>
   );
 }
