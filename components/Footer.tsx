@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function Footer(){return <footer className="mt-20 border-t border-slate-200 bg-white py-8 dark:border-slate-800 dark:bg-slate-950"><div className="container-page flex flex-col justify-between gap-4 text-sm text-slate-500 md:flex-row"><p>© {new Date().getFullYear()} دليل التخصصات الجامعية الجزائرية</p><div className="flex gap-5"><Link href="/about">عن الدليل</Link><Link href="/privacy">الخصوصية</Link></div><p>البيانات إرشادية؛ المرجع النهائي هو منشور وزارة التعليم العالي.</p></div></footer>}
